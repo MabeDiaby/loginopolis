@@ -36,8 +36,22 @@ app.post('/register', async (req, res, next) => {
 
 // POST /login
 // TODO - takes req.body of {username, password}, finds user by username, and compares the password with the hashed version from the DB
-// app.post('/login', async (req, res) => {
-
-// })
+app.post('/login', async (req, res, next) => {
+  try {
+    const {username, password} = req.body
+    const findUser = await User.findOne({
+      where: username
+    })
+    const isAMatch = await bcrypt.compare(findUser.password, hashedPassword)
+    if (isAMatch === True) {
+      res.status(200).send(`successfully logged in user ${findUser.username}`)
+    } else if (isAMatch === False) {
+      res.status(401).send('incorrect username or password')
+    }
+  } catch (err) {
+    console.error(err)
+    next(err)
+  }
+})
 // we export the app, not listening in here, so that we can run tests
 module.exports = app;
